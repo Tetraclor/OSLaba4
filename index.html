@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8" />
+  <title>Задача с фишками</title>
+  <style>
+   article, aside, details, figcaption, figure, footer,header,
+   hgroup, menu, nav, section { display: block; }
+   #result_box{
+		text-align: center;
+   }
+   
+   #test{
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+   }
+   table{
+   
+		display: block;
+		margin-left: auto;
+		margin-right: auto 
+   }
+  </style>
+ </head>
+ <body>
+	<div id="result_box">
+		Количество 'закрытых' черных фишек: <a id='result'>0</a>
+	</div>
+	<div>
+	<div id="test">
+	</div>
+	</div>
+	
+ </body>
+ <script>
+ 
+	let size = prompt('Размер поля:');	
+	size = parseInt(size);	
+	if(Number.isInteger(size) == false || size > 10 || size < 3)
+		size = 3;
+		
+	CreateBoard(size);
+	let grid = GetGrid(size);
+	AddMouseListener(grid);
+	
+	
+	function GetGrid(gridSize){
+		var cells = document.getElementsByClassName("cell");
+		let grid = [];
+		for(let i = 0; i < gridSize; i++) grid.push([]);
+		for(var i = 0; i < gridSize * gridSize; i++){
+			grid[i % gridSize].push(cells[i]);
+		}
+		return grid;
+	}
+	
+	function AddMouseListener(grid){
+		var cells = document.getElementsByClassName("cell");
+		for(var i = 0; i < cells.length; i++){
+			const cell = cells[i];
+			cell.isBlack = true;
+			cell.addEventListener('mousedown', event => {CellSwap(cell); ScoreRefresh(grid)});
+		}
+	}
+	
+	function CreateBoard(size){
+		let table = document.createElement('table');
+		
+		for(let i = 0; i < size; i++){
+			table.appendChild(CreateLine(size, i));
+		}
+		
+		let test = document.getElementById('test');
+		console.log(test);
+		test.appendChild(table);
+		
+		function CreateLine(size, lineIndex){
+			let tr = document.createElement('tr');
+			for(let i = 0; i < size; i++){
+				tr.appendChild(CreateCell(i+''+lineIndex));
+			}
+			return tr;
+		}
+		
+		function CreateCell(id){
+			let cell = document.createElement('td');
+			let image = CreateImage(id, 'cell', 'black_circle.png');
+			cell.appendChild(image);
+			return cell;
+		}
+		
+		function CreateImage(id, class_, src){
+			let image = document.createElement('img');
+			image.id = id;
+			image.setAttribute('class', class_);
+			image.setAttribute('src', src);
+			return image;
+		}
+	}
+	
+	function CellSwap(cell){
+		var imagefile = '';
+		if(cell.isBlack) imagefile = 'white_circle.png';
+		else imagefile = 'black_circle.png';
+		cell.src = imagefile;
+		cell.isBlack = !cell.isBlack;
+	}
+	
+	function ScoreRefresh(grid){
+		let scoreLabel = document.getElementById('result');
+		let score = GetScore(grid);
+		scoreLabel.innerHTML = score;
+	}
+	
+	function GetScore(grid){
+		let score = 0; 
+		let size = grid.length;
+		for(let y= 0; y < grid.length; y++){
+			for(let x = 0;  x < grid[y].length; x++){
+			    let cell = grid[y][x];
+				if(IsCloseBlack(grid, x, y, size)) {
+					cell.src = 'close_circle.png';
+					score++;
+				}else if(cell.isBlack) cell.src = 'black_circle.png';
+			}
+		}
+		return score;
+		
+		function IsCloseBlack(grid, x, y, size){
+			let cell = grid[y][x];
+			if(cell.isBlack == false) return false;
+			let count = 0;		
+			if(y - 1 < 0 || grid[y - 1][x].isBlack == false) 
+				count++;
+			if(y + 1 >= size || grid[y + 1][x].isBlack == false) 
+				count++;
+			if(x - 1 < 0 || grid[y][x - 1].isBlack == false)
+				count++;
+			if(x + 1 >= size || grid[y][x + 1].isBlack == false)
+				count++;
+			
+			return count == 4;
+		}
+	}
+ </script>
+</html>
